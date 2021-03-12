@@ -1,0 +1,74 @@
+#!/usr/bin/python
+file = open("CONTCAR","r")
+plist = []
+for line in file:
+        line.rstrip()
+        data = line.split()
+        plist.append(data)
+
+import sys
+import math
+import time
+import datetime
+from math import *
+
+# Scaling factor...
+dim = float(plist[1][0])
+# Magnitude of lattice vectors
+a = dim*sqrt(float(plist[2][0])**2+float(plist[2][1])**2+float(plist[2][2])**2)
+b = dim*sqrt(float(plist[3][0])**2+float(plist[3][1])**2+float(plist[3][2])**2)
+c = dim*sqrt(float(plist[4][0])**2+float(plist[4][1])**2+float(plist[4][2])**2)
+# xyz coordinates of lattice vectors
+a1=float(plist[2][0])
+a2=float(plist[2][1])
+a3=float(plist[2][2])
+b1=float(plist[3][0])
+b2=float(plist[3][1])
+b3=float(plist[3][2])
+c1=float(plist[4][0])
+c2=float(plist[4][1])
+c3=float(plist[4][2])
+# angles between lattice vectors
+alpha = degrees(acos((b1*c1+b2*c2+b3*c3)/(b*c)))
+beta = degrees(acos((a1*c1+a2*c2+a3*c3)/(a*c)))
+gamma = degrees(acos((a1*b1+a2*b2+a3*b3)/(a*b)))
+# outfile is 'poscar.car'
+carfile = open("poscar.car","w")
+carfile.write("!BIOSYM archive 3\n")
+carfile.write("PBC=ON\n")
+carfile.write("TITLE\n")
+carfile.write("!DATE %s\n" % datetime.datetime.now().strftime("%a %b %d %H:%M:%S %Y"))
+carfile.write("PBC   %.5f  %.5f  %.5f  %.5f  %.5f  %.5f (P1)\n" % (a, b, c, alpha, beta, gamma))
+#Case 1: atom positions given in fractional coordinates
+if plist[7][0] == 'Direct':
+	h = 8
+	# j counts over atom species 
+	for j in range(len(plist[5])):
+		# i counts over number of atoms of species j
+		for i in range(int(plist[6][j])):
+      			k = i + h 
+       			#xyz position in fractional coordinates
+			xf = float(plist[k][0])
+			yf = float(plist[k][1])
+			zf = float(plist[k][2])
+	       		# convert to Cartesian:
+			xc = round(xf*a1+yf*b1+zf*c1,10)
+        		yc = round(xf*a2+yf*b2+zf*c2,10)
+	        	zc = round(xf*a3+yf*b3+zf*c3,10) 
+			carfile.write("%-2s      %12s   %12s   %12s XXXX 1      xx      %-2s  0.000\n" % (plist[5][j].upper(), format(xc,'.9f'), format(yc,'.9f'), format(zc,'.9f'), plist[5][j].upper()))
+		h += int(plist[6][j])
+
+else:
+	h = 8
+	for j in range(len(plist[5])):
+		for i in range(int(plist[6][j])):
+			k = i + h
+			xc = round(float(plist[k][0])*dim,10)
+            		yc = round(float(plist[k][1])*dim,10)
+            		zc = round(float(plist[k][2])*dim,10)
+			carfile.write("%-2s      %12s   %12s   %12s XXXX 1      xx      %-2s  0.000\n" % (plist[5][j].upper(), format(xc,'.9f'), format(yc,'.9f'), format(zc,'.9f'), plist[5][j].upper()))
+                h += int(plist[6][j])
+carfile.write("end\n")
+carfile.write("end\n")
+
+print "Conversion complete... "
