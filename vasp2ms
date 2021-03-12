@@ -5,7 +5,8 @@ import time
 import datetime
 from math import *
 
-# Use as "vasp2ms POSCAR" or "vasp2ms CONTCAR"
+# This script converts POSCAR or CONTCAR to geometry.car file to be read by Materials Studio
+# Use in command line as "vasp2ms POSCAR" or "vasp2ms CONTCAR"
 # writes output to geometry.car
 # Input file specified by user - POSCAR or CONTCAR
 file = open(sys.argv[1],"r")
