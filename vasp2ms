@@ -83,6 +83,7 @@ elif plist[7][0] == 'Cartesian':
 
 # If Selective dynamics are turned on
 elif plist[7][0] == 'Selective':
+    # Case 1: atom positions in fractional coordinates
     if plist[8][0] == 'Direct':
         cond = True
         # start counting from 9th line of input file
