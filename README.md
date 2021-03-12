@@ -1,5 +1,6 @@
 # vasp2materialsstudio
 Python script to convert POSCAR or CONTCAR to geometry.car file for Materials Studio
+
 Use in command line as: vasp2ms CONTCAR
                     or: vasp2ms POSCAR
                     
