@@ -48,7 +48,9 @@ carfile.write("PBC   %.5f  %.5f  %.5f  %.5f  %.5f  %.5f (P1)\n" % (a, b, c, alph
 # Consider 2 cases: coordinates in fractional or Cartesian coordinates
 # Case 1: atom positions given in fractional coordinates
 if plist[7][0] == 'Direct':
-	h = 8
+	cond = True
+        # start counting from 8th line of input file
+        h = 8
 	# j counts over atom species 
 	for j in range(len(plist[5])):
 		# i counts over number of atoms of species j
@@ -66,8 +68,10 @@ if plist[7][0] == 'Direct':
 		h += int(plist[6][j])
 
 # Case 2: atom positions in cartesian coordinates
-else:
-	h = 8
+elif plist[7][0] == 'Cartesian':
+	cond = True
+        # start counting from 8th line of input file
+        h = 8
 	for j in range(len(plist[5])):
 		for i in range(int(plist[6][j])):
 			k = i + h
@@ -76,7 +80,56 @@ else:
             		zc = round(float(plist[k][2])*dim,10)
 			carfile.write("%-2s      %12s   %12s   %12s XXXX 1      xx      %-2s  0.000\n" % (plist[5][j].upper(), format(xc,'.9f'), format(yc,'.9f'), format(zc,'.9f'), plist[5][j].upper()))
                 h += int(plist[6][j])
+
+# If Selective dynamics are turned on
+elif plist[7][0] == 'Selective':
+    if plist[8][0] == 'Direct':
+        cond = True
+        # start counting from 9th line of input file
+        h = 9
+        # j counts over atom species
+        for j in range(len(plist[5])):
+                # i counts over number of atoms of species j
+                for i in range(int(plist[6][j])):
+                        k = i + h
+                        #xyz position in fractional coordinates
+                        xf = float(plist[k][0])
+                        yf = float(plist[k][1])
+                        zf = float(plist[k][2])
+                        # convert to Cartesian:
+                        xc = round(xf*a1+yf*b1+zf*c1,10)
+                        yc = round(xf*a2+yf*b2+zf*c2,10)
+                        zc = round(xf*a3+yf*b3+zf*c3,10)
+                        carfile.write("%-2s      %12s   %12s   %12s XXXX 1      xx      %-2s  0.000\n" % (plist[5][j].upper(), format(xc,'.9f'), format(yc,'.9f'), format(zc,'.9f'), plist[5][j].upper()))
+                h += int(plist[6][j])
+
+    # Case 2: atom positions in cartesian coordinates
+    elif plist[8][0] == 'Cartesian':
+        cond = True
+        # start counting from 9th line of input file
+        h = 9
+        for j in range(len(plist[5])):
+                for i in range(int(plist[6][j])):
+                        k = i + h
+                        xc = round(float(plist[k][0])*dim,10)
+                        yc = round(float(plist[k][1])*dim,10)
+                        zc = round(float(plist[k][2])*dim,10)
+                        carfile.write("%-2s      %12s   %12s   %12s XXXX 1      xx      %-2s  0.000\n" % (plist[5][j].upper(), format(xc,'.9f'), format(yc,'.9f'), format(zc,'.9f'), plist[5][j].upper()))
+                h += int(plist[6][j])
+    else:
+        cond = False
+        print "Error: Input file has incorrect format."
+
+
+else:
+    cond = False
+    print "Error: Input file has incorrect format."
+
+
 carfile.write("end\n")
 carfile.write("end\n")
 
-print "Writing to geometry.car... Complete"
+if cond == True:
+    print "Writing to geometry.car... Complete"
+else:
+    print "Unable to convert file."
